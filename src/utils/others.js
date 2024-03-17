@@ -169,7 +169,7 @@ export const sendTxWithHash = async (provider, wallet, module, name, from, to, v
     
         if (receipt.hash.startsWith('0x') && receipt.status === 1) {
             logger.success(`[${from}] [${module}] ${name} finished | TxID: ${constants.networkData.linea.scan}/${receipt.hash}`)
-            await utils.sendTgMessage(tglogs.successMint({hash: receipt.hash}))
+            await sendTgMessage(tglogs.successMint({hash: receipt.hash}))
             return true
         } else {
             throw new Error(`${name} transaction status is failed or hash not found`)

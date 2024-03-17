@@ -130,6 +130,8 @@ const run = async () => {
         try {
             await sleep(random.getRandomInt(1, 60));
 
+            logger.info(`[${walletData.address}] wallet started`)
+
             const provider = await utils.getRpcProvider('linea')
             const wallet = new ethers.Wallet(walletData.key, provider)
             
