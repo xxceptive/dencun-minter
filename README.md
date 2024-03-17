@@ -17,6 +17,14 @@
 3. Configure your Telegram bot for notifications in src/config.js
 4. Run the script: `npm start`
 
+## Data Format
+
+❗ **DATA FORMAT (data/data.txt):** 
+   - private_key:proxy
+   
+❗ **Proxy Format (proxy):** 
+   - host:port:username:password
+
 ## Usage
 - Follow the prompts to enter necessary information.
 - Sit back and relax while Dencun Minter handles the minting process for you!
