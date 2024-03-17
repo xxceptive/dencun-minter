@@ -18,7 +18,7 @@
 4. Run the script: `npm start`
 
 ❗DATA FORMAT (data/data.txt) = private_key:proxy
-❗proxy = host:port:username:password 
+❗proxy = host:port:username:password ❗
 
 ## Usage
 - Follow the prompts to enter necessary information.
