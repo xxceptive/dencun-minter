@@ -9,6 +9,46 @@ import { logger } from './utils/logger.js';
 import { sleep } from './utils/sleep.js';
 import * as ua from "random-useragent";
 
+const getVoucher = async(data, wallet) => {
+    let signature
+    let expiry
+    let nonce
+
+    try {
+        let response = await fetch("https://public-api.consensys-nft.com/v1/purchase-intents", {
+            headers: {
+              "accept": "*/*",
+              "accept-language": "ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7,uk;q=0.6",
+              "content-type": "application/json",
+              "sec-ch-ua": ua.getRandom(),
+              "sec-ch-ua-mobile": "?0",
+              "sec-ch-ua-platform": "\"Windows\"",
+              "sec-fetch-dest": "empty",
+              "sec-fetch-mode": "cors",
+              "sec-fetch-site": "cross-site",
+              "Referer": "https://app.phosphor.xyz/",
+              "Referrer-Policy": "strict-origin-when-cross-origin"
+            },
+            body: `{\"buyer\":{\"eth_address\":\"${wallet.address}\"},\"listing_id\":\"717d7853-49e0-4f71-b351-50900c0a143e\",\"provider\":\"MINT_VOUCHER\",\"quantity\":1}`,
+            method: "POST",
+            agent: data.proxy.httpsAgent
+        })
+
+
+        response = await response.json()
+        response = response.data
+
+        if (response.hasOwnProperty('voucher') && response.hasOwnProperty('signature')) {
+            signature = response.signature
+            expiry = response.voucher.expiry
+            nonce = response.voucher.nonce
+        }
+    } catch (error) {
+        logger.error(`[${wallet.address}] [DENCUN MINT] voucher fetch failed: ${error}`)
+    }
+
+    return {signature, expiry, nonce}
+}
 
 const mintProcess = async(data, provider, wallet) => {
     let stats = {
@@ -19,49 +59,21 @@ const mintProcess = async(data, provider, wallet) => {
 
     let lastNonce = -1
     while (stats.nft_minted < config.mintAmount) {
-        let signature
-        let expiry
-        let nonce
-
         try {
-            let response = await fetch("https://public-api.consensys-nft.com/v1/purchase-intents", {
-                headers: {
-                  "accept": "*/*",
-                  "accept-language": "ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7,uk;q=0.6",
-                  "content-type": "application/json",
-                  "sec-ch-ua": ua.getRandom(),
-                  "sec-ch-ua-mobile": "?0",
-                  "sec-ch-ua-platform": "\"Windows\"",
-                  "sec-fetch-dest": "empty",
-                  "sec-fetch-mode": "cors",
-                  "sec-fetch-site": "cross-site",
-                  "Referer": "https://app.phosphor.xyz/",
-                  "Referrer-Policy": "strict-origin-when-cross-origin"
-                },
-                body: `{\"buyer\":{\"eth_address\":\"${wallet.address}\"},\"listing_id\":\"717d7853-49e0-4f71-b351-50900c0a143e\",\"provider\":\"MINT_VOUCHER\",\"quantity\":1}`,
-                method: "POST",
-                agent: data.proxy.httpsAgent
-            })
-
-
-            response = await response.json()
-            response = response.data
-
-            if (response.hasOwnProperty('voucher') && response.hasOwnProperty('signature')) {
-                signature = response.signature
-                expiry = response.voucher.expiry
-                nonce = response.voucher.nonce
-
+        let voucher = await getVoucher(data, wallet)
+            if (voucher.signature && voucher.nonce) {
                 let waitingRetry = 0
+                let nonce = voucher.nonce
                 while (lastNonce === nonce && waitingRetry < 15) {
+                    voucher = await getVoucher(data, wallet)
                     logger.info(`[${data.address}] [DENCUN MINT] waiting for new nonce, sleep for 120 seconds`)
                     await sleep(120)
                     waitingRetry++
                 }
 
-                let nonceBytes = nonce.toString().padStart(64, '0')
-                expiry = expiry.toString(16).padStart(64, '0')
-                signature = signature.slice(2)
+                let nonceBytes = voucher.nonce.toString().padStart(64, '0')
+                let expiryBytes = voucher.expiry.toString(16).padStart(64, '0')
+                let signatureBytes = voucher.signature.slice(2)
                 
                 let tx_data =
                     "0xd4dfd6bc" +
@@ -70,13 +82,13 @@ const mintProcess = async(data, provider, wallet) => {
                     0000000000000000000000000000000000000000000000000000000000000000
                     0000000000000000000000000000000000000000000000000000000000000001` +
                     nonceBytes +
-                    expiry +
+                    expiryBytes +
                     `0000000000000000000000000000000000000000000000000000000000000000
                     0000000000000000000000000000000000000000000000000000000000000001
                     0000000000000000000000000000000000000000000000000000000000000000
                     0000000000000000000000000000000000000000000000000000000000000140
                     0000000000000000000000000000000000000000000000000000000000000041` +
-                    signature +
+                    signatureBytes +
                     '00000000000000000000000000000000000000000000000000000000000000';
 
                 tx_data = tx_data.replace(/\s/g, '');
@@ -96,7 +108,7 @@ const mintProcess = async(data, provider, wallet) => {
                     stats.nft_minted++
                 }
 
-                lastNonce = nonce
+                lastNonce = voucher.nonce
             }
         } catch (error) {
             logger.error(`[${data.address}] error: ${error}`)
