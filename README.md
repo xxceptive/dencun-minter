@@ -17,8 +17,13 @@
 3. Configure your Telegram bot for notifications in src/config.js
 4. Run the script: `npm start`
 
-❗DATA FORMAT (data/data.txt) = private_key:proxy
-❗proxy = host:port:username:password ❗
+## Data Format
+
+❗ **DATA FORMAT (data/data.txt):** 
+   - private_key:proxy
+   
+❗ **Proxy Format (proxy):** 
+   - host:port:username:password
 
 ## Usage
 - Follow the prompts to enter necessary information.
