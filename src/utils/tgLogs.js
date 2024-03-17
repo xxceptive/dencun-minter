@@ -21,7 +21,7 @@ export const successWallet = (data) => {
 
 [Check in explorer](https://lineascan.build/address/${data.address})
     
-Success wallets: _${data.walletsDone}/${data.walletsTotal}_`
+Success wallets: _${data.walletsDone.length}/${data.walletsTotal}_`
 }
 
 export const successMint = (data) => {
