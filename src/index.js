@@ -132,7 +132,7 @@ const run = async () => {
 
             logger.info(`[${walletData.address}] wallet started`)
 
-            const provider = await utils.getRpcProvider('linea')
+            const provider = await utils.getRpcProvider('linea', walletData.proxy)
             const wallet = new ethers.Wallet(walletData.key, provider)
             
             const walletResult = await mintProcess(walletData, provider, wallet);

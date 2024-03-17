@@ -15,7 +15,21 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 
-export const getRpcProvider = async (chain) => {
+export const getRpcProvider = async (chain, proxy) => {
+    /* 
+
+    proxy: {
+        host,
+        port,
+        username,
+        password,
+        url,
+        httpAgent,
+        httpsAgent
+    }
+
+    */
+
     let retryCount = 0;
     let status = false;
     let rpcList = constants.networkData[chain]['rpc']
@@ -23,6 +37,10 @@ export const getRpcProvider = async (chain) => {
     while (!status && retryCount < 3) {
         for (let rpc of rpcList) {
             try {
+                if (proxy && Object.prototype.hasOwnProperty('httpsAgent')) {
+                    FetchRequest.registerGetUrl(FetchRequest.createGetUrlFunc({agent: proxy.httpsAgent}))
+                }
+
                 let provider = new ethers.JsonRpcProvider(rpc)
                 let block = await provider.getBlockNumber()
                 
@@ -35,6 +53,7 @@ export const getRpcProvider = async (chain) => {
             } catch (error) {
                 retryCount++;
                 logger.error(`error while connecting to ${rpc}: ${error} | retries: ${retryCount}/3`)
+                console.log(error.stack)
                 await new Promise(resolve => setTimeout(resolve, 3000))
             }
         }
