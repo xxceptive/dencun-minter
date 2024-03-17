@@ -6,6 +6,7 @@ import {ethers} from 'ethers';
 import { fileURLToPath } from 'url';
 
 import { logger } from './logger.js';
+import * as tglogs from './tgLogs.js';
 import * as constants from './constants.js';
 import * as config from '../config.js';
 import * as random from '../utils/random.js';
@@ -188,7 +189,7 @@ export const sendTxWithHash = async (provider, wallet, module, name, from, to, v
     
         if (receipt.hash.startsWith('0x') && receipt.status === 1) {
             logger.success(`[${from}] [${module}] ${name} finished | TxID: ${constants.networkData.linea.scan}/${receipt.hash}`)
-            await sendTgMessage(tglogs.successMint({hash: receipt.hash}))
+            await sendTgMessage(tglogs.successMint({address: wallet.address, hash: receipt.hash}))
             return true
         } else {
             throw new Error(`${name} transaction status is failed or hash not found`)
