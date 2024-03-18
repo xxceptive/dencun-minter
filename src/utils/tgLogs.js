@@ -41,6 +41,9 @@ export const finish = (data) => {
 ————————
             
 ✅ Script is finished
+
+Total minted:
+_${data.totalNfts}_
     
 ElapsedTime:
 _${data.elapsedTime}_
