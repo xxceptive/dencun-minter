@@ -248,4 +248,3 @@ export const formatTime = (milliseconds) => {
         return `${formattedDays} days ${formattedHours} hours ${remainingMinutes} minutes ${remainingSeconds} seconds`;
     }
 };
-
