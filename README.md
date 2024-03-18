@@ -1,7 +1,7 @@
 # 🌟 Dencun Minter 🌟
 
 ## Functionality
-- **Mint Dencun NFTs:** Mint Dencun: Community Edition NFTs on the Linie network.
+- **Mint Dencun NFTs:** Mint Dencun: Community Edition NFTs on the Linea network.
 - **Concurrency:** Supports concurrent mode to asynchronously run multiple wallets.
 - **Wait for Nonce Update:** Wait for the nonce to update before proceeding to the next minting process.
 - **Telegram Notifications:** Receive notifications via Telegram for minting updates.
